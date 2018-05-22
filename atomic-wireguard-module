@@ -1,0 +1,137 @@
+#!/bin/bash
+
+# The MIT License
+
+# Copyright (c) 2018 Joe Doss
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+set -e
+
+WIREGUARD_KERNEL_VERSION=$(uname -r)
+
+build_wireguard()
+{
+
+  if [[ "$(podman images -n |grep wireguard|awk '{print $2}')" =~ (^|[[:space:]])${WIREGUARD_VERSION}($|[[:space:]]) ]]; then
+
+    echo "The WireGuard ${WIREGUARD_VERSION} kernel module container is already built."
+
+    else
+
+    echo "The WireGuard ${WIREGUARD_VERSION} kernel module container is not built."
+    echo "Building ${WIREGUARD_VERSION} kernel module for ${WIREGUARD_KERNEL_VERSION} ..."
+
+    podman build --build-arg WIREGUARD_VERSION=${WIREGUARD_VERSION} --build-arg WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION} -t wireguard:${WIREGUARD_VERSION} https://github.com/jdoss/atomic-wireguard
+  fi
+
+  if [ "${WIREGUARD_VERSION}" != "$(podman run --name wireguard -e "WIREGUARD_VERSION=${WIREGUARD_VERSION}" \
+    -e "WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION}" --rm --privileged \
+    wireguard:${WIREGUARD_VERSION} modinfo /usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/extra/wireguard.ko \
+    |grep '^version'|awk '{print $2}')" ]; then
+
+    echo "The WireGuard kernel module for ${WIREGUARD_KERNEL_VERSION} is not the correct version."
+    echo "Building ${WIREGUARD_VERSION} kernel module for ${WIREGUARD_KERNEL_VERSION} ..."
+
+    podman build --build-arg WIREGUARD_VERSION=${WIREGUARD_VERSION} --build-arg WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION} -t wireguard:${WIREGUARD_VERSION} https://github.com/jdoss/atomic-wireguard
+  fi
+
+  echo "Cleaning up old WireGuard kernel module container builds..."
+
+  podman rmi $(podman images -f "dangling=true" -q) &> /dev/null || true
+
+  if [ "$WIREGUARD_PRUNE_OLD_VERSIONS" = true ] ; then
+
+    for OLD_IMAGES in $(podman images -n|grep wireguard|grep -v ${WIREGUARD_VERSION}|awk '{print $3}'); do
+      podman rmi ${OLD_IMAGES} &> /dev/null || true
+    done
+
+  fi
+
+}
+
+unload_wireguard()
+{
+  echo "Unloading WireGuard..."
+  if lsmod |grep "wireguard" &> /dev/null; then
+    rmmod wireguard
+  fi
+
+  if lsmod | grep "udp_tunnel" &> /dev/null; then
+    rmmod udp_tunnel
+  fi
+
+  if lsmod | grep "ip6_udp_tunnel" &> /dev/null; then
+    rmmod ip6_udp_tunnel
+  fi
+}
+
+load_wireguard()
+{
+  echo "Loading WireGuard..."
+  if ! lsmod | grep "udp_tunnel" &> /dev/null; then
+    podman run --name wireguard -e "WIREGUARD_VERSION=${WIREGUARD_VERSION}" \
+    -e "WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION}" --rm --privileged \
+    wireguard:${WIREGUARD_VERSION} modprobe udp_tunnel
+  fi
+
+  if ! lsmod | grep "ip6_udp_tunnel" &> /dev/null; then
+    podman run --name wireguard -e "WIREGUARD_VERSION=${WIREGUARD_VERSION}" \
+    -e "WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION}" --rm --privileged \
+    wireguard:${WIREGUARD_VERSION} modprobe ip6_udp_tunnel
+  fi
+
+  if ! lsmod |grep "wireguard" &> /dev/null; then
+    podman run --name wireguard -e "WIREGUARD_VERSION=${WIREGUARD_VERSION}" \
+    -e "WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION}" --rm --privileged \
+    wireguard:${WIREGUARD_VERSION} \
+    insmod /usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/extra/wireguard.ko
+  fi
+}
+
+
+case "$1" in
+        build)
+          build_wireguard
+        ;;
+
+        load)
+          load_wireguard
+        ;;
+
+        unload)
+          unload_wireguard
+        ;;
+
+        reload)
+          build_wireguard
+          unload_wireguard
+          load_wireguard
+        ;;
+
+        *)
+          echo $"Unknown command. Exiting."
+          echo "Usage:"
+          echo ""
+          echo "build       Build wireguard kernel module container"
+          echo "load        Load wireguard kernel module"
+          echo "unload      Unload wireguard kernel module"
+          echo "reload      Build and reload wireguard kernel module"
+          exit 1
+esac

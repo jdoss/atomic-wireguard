@@ -1,0 +1,20 @@
+[Unit]
+Description=Atomic WireGuard
+Requires=systemd-networkd.socket
+After=systemd-networkd.socket
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/atomic-wireguard
+TimeoutStartSec=15m
+RemainAfterExit=true
+ExecStartPre=/usr/lib/systemd/systemd-networkd-wait-online --interface=${WIREGUARD_INTERFACE_NAME}
+ExecStartPre=/usr/bin/atomic-wireguard-module build
+ExecStart=/usr/bin/atomic-wireguard-module load
+ExecReload=/usr/bin/atomic-wireguard-module reload
+ExecStop=/usr/bin/atomic-wireguard-module unload
+
+[Install]
+WantedBy=network.target
