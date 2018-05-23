@@ -38,7 +38,7 @@ build_wireguard()
     echo "The WireGuard ${WIREGUARD_VERSION} kernel module container is not built."
     echo "Building ${WIREGUARD_VERSION} kernel module for ${WIREGUARD_KERNEL_VERSION} ..."
 
-    podman build --build-arg WIREGUARD_VERSION=${WIREGUARD_VERSION} --build-arg WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION} -t wireguard:${WIREGUARD_VERSION} https://github.com/jdoss/atomic-wireguard
+    podman build --build-arg WIREGUARD_VERSION=${WIREGUARD_VERSION} --build-arg WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION} -t wireguard:${WIREGUARD_VERSION} git://github.com/jdoss/atomic-wireguard
   fi
 
   if [ "${WIREGUARD_VERSION}" != "$(podman run --name wireguard -e "WIREGUARD_VERSION=${WIREGUARD_VERSION}" \
@@ -49,7 +49,7 @@ build_wireguard()
     echo "The WireGuard kernel module for ${WIREGUARD_KERNEL_VERSION} is not the correct version."
     echo "Building ${WIREGUARD_VERSION} kernel module for ${WIREGUARD_KERNEL_VERSION} ..."
 
-    podman build --build-arg WIREGUARD_VERSION=${WIREGUARD_VERSION} --build-arg WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION} -t wireguard:${WIREGUARD_VERSION} https://github.com/jdoss/atomic-wireguard
+    podman build --build-arg WIREGUARD_VERSION=${WIREGUARD_VERSION} --build-arg WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION} -t wireguard:${WIREGUARD_VERSION} git://github.com/jdoss/atomic-wireguard
   fi
 
   echo "Cleaning up old WireGuard kernel module container builds..."
