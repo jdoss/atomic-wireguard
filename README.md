@@ -20,27 +20,33 @@ This is a work in progress. Please use at your own risk. Issues and PRs are very
 ## Installation
 
 ### Fedora Atomic Host and Silverblue
-* `rpm-ostree upgrade`
-* `sudo curl -Lo /tmp/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm https://kojipkgs.fedoraproject.org//packages/container-selinux/2.61/1.git9b55129.fc28/noarch/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm`
-* `rpm-ostree upgrade /tmp/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm`
-* `sudo curl -Lo /etc/yum.repos.d/atomic-wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/atomic-wireguard/repo/fedora-28/jdoss-atomic-wireguard-fedora-28.repo`
-* `sudo rpm-ostree install atomic-wireguard`
-* `systemctl reboot`
-* `sudo systemctl enable systemd-networkd.service`
-* `sudo systemctl start systemd-networkd.service`
-* `sudo systemctl enable atomic-wireguard`
-* `sudo systemctl start atomic-wireguard`
 
-Note: As soon as the next Fedora Atomic composes come out manually installing container-selinux-2.61 will get removed from the above steps.
+```bash
+# rpm-ostree upgrade
+# sudo curl -Lo /tmp/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm https://kojipkgs.fedoraproject.org/packages/container-selinux/2.61/1.git9b55129.fc28/noarch/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm
+# rpm-ostree upgrade /tmp/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm
+# sudo curl -Lo /etc/yum.repos.d/atomic-wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/atomic-wireguard/repo/fedora-28/jdoss-atomic-wireguard-fedora-28.repo
+# sudo rpm-ostree install atomic-wireguard
+# systemctl reboot
+# sudo systemctl enable systemd-networkd.service
+# sudo systemctl start systemd-networkd.service
+# sudo systemctl enable atomic-wireguard
+# sudo systemctl start atomic-wireguard
+```
+
+Note: As soon as the next Fedora Atomic composes come out manually installing `container-selinux-2.61` will get removed from the above steps.
 
 ### Fedora Workstation
-* `sudo dnf copr enable jdoss/atomic-wireguard`
-* `sudo dnf install atomic-wireguard`
-* `sudo systemctl enable systemd-networkd.service`
-* `sudo systemctl start systemd-networkd.service`
-* `sudo systemctl enable atomic-wireguard`
-* `sudo systemctl start atomic-wireguard`
 
+```bash
+# sudo dnf install https://kojipkgs.fedoraproject.org/packages/container-selinux/2.61/1.git9b55129.fc28/noarch/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm
+# sudo dnf copr enable jdoss/atomic-wireguard
+# sudo dnf install atomic-wireguard
+# sudo systemctl enable systemd-networkd.service
+# sudo systemctl start systemd-networkd.service
+# sudo systemctl enable atomic-wireguard
+# sudo systemctl start atomic-wireguard
+```
 
 ## Usage
 
@@ -80,6 +86,8 @@ PublicKey=${REMOTE PUBLIC KEY}
 AllowedIPs=0.0.0.0/0
 Endpoint=${REMOTE IP ADDRESS}:51820
 ```
+
+**Note:** Replace `${LOCAL PUBLIC KEY}` with your generated public key stored in `/etc/wireguard/wg0-public.key`. Replace `${REMOTE PUBLIC KEY}` with the public key from the remote WireGuard server and `${REMOTE IP ADDRESS}` from the remote WiredGuard server.
 
 **Create /etc/systemd/network/wg0.network**
 
