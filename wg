@@ -2,6 +2,8 @@
 
 source /etc/sysconfig/atomic-wireguard
 
+WIREGUARD_KERNEL_VERSION=$(uname -r)
+
 podman run --name wireguard -e "WIREGUARD_VERSION=${WIREGUARD_VERSION}" \
 -e "WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION}" --rm --privileged \
 wireguard:${WIREGUARD_VERSION} /usr/bin/wg $@
