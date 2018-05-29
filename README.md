@@ -34,7 +34,6 @@ This is a work in progress. Please use at your own risk. Issues and PRs are very
 # sudo systemctl start atomic-wireguard
 ```
 
-Note: As soon as the next Fedora Atomic composes come out manually installing `container-selinux-2.61` will get removed from the above steps.
 
 ### Fedora Workstation
 
@@ -47,6 +46,8 @@ Note: As soon as the next Fedora Atomic composes come out manually installing `c
 # sudo systemctl enable atomic-wireguard
 # sudo systemctl start atomic-wireguard
 ```
+
+Note: As soon as the next Fedora Atomic composes come out manually installing `container-selinux-2.61` will get removed from the above steps.
 
 ## Usage
 
@@ -87,7 +88,7 @@ AllowedIPs=0.0.0.0/0
 Endpoint=${REMOTE IP ADDRESS}:51820
 ```
 
-**Note:** Replace `${LOCAL PUBLIC KEY}` with your generated public key stored in `/etc/wireguard/wg0-public.key`. Replace `${REMOTE PUBLIC KEY}` with the public key from the remote WireGuard server and `${REMOTE IP ADDRESS}` from the remote WiredGuard server.
+Note: Replace `${LOCAL PUBLIC KEY}` with your generated public key stored in `/etc/wireguard/wg0-public.key`. Replace `${REMOTE PUBLIC KEY}` with the public key from the remote WireGuard server and `${REMOTE IP ADDRESS}` from the remote WiredGuard server.
 
 **Create /etc/systemd/network/wg0.network**
 
