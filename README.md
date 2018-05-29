@@ -34,7 +34,6 @@ This is a work in progress. Please use at your own risk. Issues and PRs are very
 # sudo systemctl start atomic-wireguard
 ```
 
-
 ### Fedora Workstation
 
 ```bash

@@ -7,7 +7,7 @@ Wants=NetworkManager-wait-online.service
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/sysconfig/atomic-wireguard
-TimeoutStartSec=15m
+TimeoutStartSec=25m
 RemainAfterExit=true
 ExecStartPre=/usr/bin/atomic-wireguard-module build
 ExecStart=/usr/bin/atomic-wireguard-module load
