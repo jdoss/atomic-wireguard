@@ -1,11 +1,14 @@
 # Atomic WireGuard
 
-Atomic WireGuard is a containerized method for building the WireGuard kernel module on Fedora Atomic Host and Silverblue. The end goals of this project is to allow for WireGuard to be built reliably on distributions with immutable file systems. It is a work in progress and PRs are very welcome.
+Atomic WireGuard is a containerized method for building the WireGuard kernel module on Fedora Atomic Host and Silverblue. It also can be used on Fedora Workstation instead of the [wireguard-dkms and wireguard-tools](https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/packages/) packages. The end goals of this project is to allow for WireGuard to be built reliably on distributions with immutable file systems. It also can be used as an example for building other kernel modules on immutable infrastructure.
+
+This is a work in progress. Please use at your own risk. Issues and PRs are very welcome.
 
 ## Limitations
 
 * This will add 5 to 10 minutes of time to your boot process if you do not have the WireGuard kernel module built for your booted kernel version.
-* This will fail if you do not have Internet access. Do not use this if you rely on WireGuard for connectivity to the Internet.
+* This will fail to build if you do not have Internet access. Do not use this if you rely on WireGuard for connectivity to the Internet.
+* This is a stopgap until WireGuard gets pushed into the mainline kernel.
 
 ## Requirements
 
@@ -16,12 +19,28 @@ Atomic WireGuard is a containerized method for building the WireGuard kernel mod
 
 ## Installation
 
-* sudo dnf copr enable jdoss/atomic-wireguard
-* sudo dnf install atomic-wireguard
-* sudo systemctl enable systemd-networkd.service
-* sudo systemctl start systemd-networkd.service
-* sudo systemctl start atomic-wireguard
-* sudo systemctl enable atomic-wireguard
+### Fedora Atomic Host and Silverblue
+* `rpm-ostree upgrade`
+* `sudo curl -Lo /tmp/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm https://kojipkgs.fedoraproject.org//packages/container-selinux/2.61/1.git9b55129.fc28/noarch/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm`
+* `rpm-ostree upgrade /tmp/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm`
+* `sudo curl -Lo /etc/yum.repos.d/atomic-wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/atomic-wireguard/repo/fedora-28/jdoss-atomic-wireguard-fedora-28.repo`
+* `sudo rpm-ostree install atomic-wireguard`
+* `systemctl reboot`
+* `sudo systemctl enable systemd-networkd.service`
+* `sudo systemctl start systemd-networkd.service`
+* `sudo systemctl enable atomic-wireguard`
+* `sudo systemctl start atomic-wireguard`
+
+Note: As soon as the next Fedora Atomic composes come out manually installing container-selinux-2.61 will get removed from the above steps.
+
+### Fedora Workstation
+* `sudo dnf copr enable jdoss/atomic-wireguard`
+* `sudo dnf install atomic-wireguard`
+* `sudo systemctl enable systemd-networkd.service`
+* `sudo systemctl start systemd-networkd.service`
+* `sudo systemctl enable atomic-wireguard`
+* `sudo systemctl start atomic-wireguard`
+
 
 ## Usage
 
@@ -34,7 +53,48 @@ unload      Unload wireguard kernel module
 reload      Build and reload wireguard kernel module
 ```
 
-It also has a systemd unit file which on start waits for NetworkManager to startup and then it will build and load the WireGuard kernel module. You can also use `systemctl reload atomic-wireguard` to run the build process, unload and then load the kernel module. This is handy if you want to change the WireGuard kernel module version. To change the version, just edit the `WIREGUARD_VERSION` line in `/etc/sysconfig/atomic-wireguard`. Please note that this needs to be the exact version number of a released snapshot. Anything else and the build process will fail.
+Atomic Wireguard also has a systemd unit file which on start waits for NetworkManager to finish starting up and then it will build and load the WireGuard kernel module. You can also use `systemctl reload atomic-wireguard` to run the build process, unload and then load the kernel module. This is handy if you want to change the WireGuard kernel module version. To change the version, just edit the `WIREGUARD_VERSION` line in `/etc/sysconfig/atomic-wireguard`. Please note that this needs to be the exact version number of a released snapshot. You can verify that the kernel module is loaded with `lsmod |grep wireguard`.
+
+From there, you can setup WireGuard using systemd-networkd:
+
+`wg genkey | tee /etc/wireguard/wg0-private.key | wg pubkey > /etc/wireguard/wg0-public.key`
+
+`# vi /etc/systemd/network/wg0.netdev`
+WS
+```bash
+[NetDev]
+Name=wg0
+Kind=wireguard
+Description=Atomic WireGuard
+
+[WireGuard]
+PrivateKey=${LOCAL PUBLIC KEY}
+ListenPort=51820
+
+[WireGuardPeer]
+PublicKey=${REMOTE PUBLIC KEY}
+AllowedIPs=0.0.0.0/0
+Endpoint=${REMOTE IP ADDRESS}:51820
+```
+
+`# vi /etc/systemd/network/wg0.network`
+
+```bash
+[Match]
+Name=wg0
+
+[Network]
+Address=10.122.122.1/24
+```
+
+Fix permissions and reload systemd:
+
+```bash
+# chown root.systemd-network /etc/systemd/network/wg0.*
+# chmod 0640 /etc/systemd/network/wg0.*
+# systemctl daemon-reload
+# systemctl restart systemd-networkd
+```
 
 ## Troubleshooting
 
