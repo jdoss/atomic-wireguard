@@ -55,12 +55,16 @@ reload      Build and reload wireguard kernel module
 
 Atomic Wireguard also has a systemd unit file which on start waits for NetworkManager to finish starting up and then it will build and load the WireGuard kernel module. You can also use `systemctl reload atomic-wireguard` to run the build process, unload and then load the kernel module. This is handy if you want to change the WireGuard kernel module version. To change the version, just edit the `WIREGUARD_VERSION` line in `/etc/sysconfig/atomic-wireguard`. Please note that this needs to be the exact version number of a released snapshot. You can verify that the kernel module is loaded with `lsmod |grep wireguard`.
 
-From there, you can setup WireGuard using systemd-networkd:
+### Setting up systemd-networkd
 
-`wg genkey | tee /etc/wireguard/wg0-private.key | wg pubkey > /etc/wireguard/wg0-public.key`
+**Generate WireGuard Keys**
+
+`# wg genkey | tee /etc/wireguard/wg0-private.key | wg pubkey > /etc/wireguard/wg0-public.key`
+
+**Create /etc/systemd/network/wg0.netdev**
 
 `# vi /etc/systemd/network/wg0.netdev`
-WS
+
 ```bash
 [NetDev]
 Name=wg0
@@ -77,6 +81,8 @@ AllowedIPs=0.0.0.0/0
 Endpoint=${REMOTE IP ADDRESS}:51820
 ```
 
+**Create /etc/systemd/network/wg0.network**
+
 `# vi /etc/systemd/network/wg0.network`
 
 ```bash
@@ -87,13 +93,21 @@ Name=wg0
 Address=10.122.122.1/24
 ```
 
-Fix permissions and reload systemd:
+**Fix permissions and reload systemd**
 
 ```bash
 # chown root.systemd-network /etc/systemd/network/wg0.*
 # chmod 0640 /etc/systemd/network/wg0.*
 # systemctl daemon-reload
 # systemctl restart systemd-networkd
+```
+
+**Verify WireGuard is working**
+
+```bash
+# wg show wg0
+# networkctl status wg0
+# ip addr show dev wg0
 ```
 
 ## Troubleshooting
