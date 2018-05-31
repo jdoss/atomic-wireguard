@@ -59,7 +59,7 @@ unload      Unload wireguard kernel module
 reload      Build and reload wireguard kernel module
 ```
 
-Atomic Wireguard also has a systemd unit file which on start waits for NetworkManager to finish starting up and then it will build and load the WireGuard kernel module. You can also use `systemctl reload atomic-wireguard` to run the build process, unload and then load the kernel module. This is handy if you want to change the WireGuard kernel module version. To change the version, just edit the `WIREGUARD_VERSION` line in `/etc/sysconfig/atomic-wireguard`. Please note that this needs to be the exact version number of a released snapshot. You can verify that the kernel module is loaded with `lsmod |grep wireguard`.
+Atomic Wireguard also has a systemd unit file which on start waits for NetworkManager to finish starting up and then it will build and load the WireGuard kernel module. You can also use `systemctl reload atomic-wireguard` to run the build process, unload and then load the kernel module. This is handy if you want to change the WireGuard kernel module version. To change the version, just edit the `WIREGUARD_VERSION` and `WIREGUARD_SHA265` lines in `/etc/sysconfig/atomic-wireguard`. Please note that this needs to be the exact version number and SHA256 hash of a released WireGuard snapshot. You can verify that the kernel module is loaded with `lsmod |grep wireguard`.
 
 ### Setting up systemd-networkd
 
