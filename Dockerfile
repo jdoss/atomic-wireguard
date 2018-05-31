@@ -4,6 +4,7 @@ MAINTAINER "Joe Doss" <joe@solidadmin.com>
 
 ARG WIREGUARD_VERSION
 ARG WIREGUARD_KERNEL_VERSION
+ARG WIREGUARD_SHA265
 
 WORKDIR /tmp
 
@@ -20,11 +21,12 @@ RUN dnf update -y && dnf install \
         kernel-devel-${WIREGUARD_KERNEL_VERSION}.rpm \
         kernel-modules-${WIREGUARD_KERNEL_VERSION}.rpm -y && \
         dnf clean all && \
-        curl -SL  https://git.zx2c4.com/WireGuard/snapshot/WireGuard-${WIREGUARD_VERSION}.tar.xz | tar xJ -C /usr/src/
+        curl -LS https://git.zx2c4.com/WireGuard/snapshot/WireGuard-${WIREGUARD_VERSION}.tar.xz | { t="$(mktemp)"; trap "rm -f '$t'" INT TERM EXIT; cat >| "$t"; \
+        sha256sum --quiet -c <<<"${WIREGUARD_SHA265} $t" || exit 1; cat "$t"; } | tar xJf -
 
 WORKDIR /usr/src/WireGuard-${WIREGUARD_VERSION}/src
 
-RUN KERNELDIR=/usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/build make && make install
+RUN KERNELDIR=/usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/build make -j$(nproc) && make install
 
 FROM fedora
 MAINTAINER "Joe Doss" <joe@solidadmin.com>
