@@ -39,7 +39,7 @@ build_wireguard()
     echo "Building ${WIREGUARD_VERSION} kernel module for ${WIREGUARD_KERNEL_VERSION} ..."
 
     podman build --build-arg WIREGUARD_VERSION=${WIREGUARD_VERSION} \
-    --build-arg WIREGUARD_SHA265=${WIREGUARD_SHA265} \
+    --build-arg WIREGUARD_SHA256=${WIREGUARD_SHA256} \
     --build-arg WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION} \
     -t wireguard:${WIREGUARD_VERSION} git://github.com/jdoss/atomic-wireguard
   fi
@@ -53,7 +53,7 @@ build_wireguard()
     echo "Building ${WIREGUARD_VERSION} kernel module for ${WIREGUARD_KERNEL_VERSION} ..."
 
     podman build --build-arg WIREGUARD_VERSION=${WIREGUARD_VERSION} \
-    --build-arg WIREGUARD_SHA265=${WIREGUARD_SHA265} \
+    --build-arg WIREGUARD_SHA256=${WIREGUARD_SHA256} \
     --build-arg WIREGUARD_KERNEL_VERSION=${WIREGUARD_KERNEL_VERSION} \
     -t wireguard:${WIREGUARD_VERSION} git://github.com/jdoss/atomic-wireguard
   fi
