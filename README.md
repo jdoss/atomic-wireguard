@@ -37,7 +37,6 @@ This is a work in progress. Please use at your own risk. Issues and PRs are very
 ### Fedora Workstation
 
 ```bash
-# sudo dnf install https://kojipkgs.fedoraproject.org/packages/container-selinux/2.61/1.git9b55129.fc28/noarch/container-selinux-2.61-1.git9b55129.fc28.noarch.rpm
 # sudo dnf copr enable jdoss/atomic-wireguard
 # sudo dnf install atomic-wireguard
 # sudo systemctl enable systemd-networkd.service
