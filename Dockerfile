@@ -46,5 +46,6 @@ COPY --from=builder /usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/extra/wireguard
                     /usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/extra/wireguard.ko
 
 COPY --from=builder /usr/bin/wg /usr/bin/wg
+COPY --from=builder /usr/bin/wg-quick /usr/bin/wg-quick
 
 CMD /usr/bin/wg
