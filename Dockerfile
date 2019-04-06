@@ -24,9 +24,8 @@ RUN dnf update -y && dnf install \
         { t="$(mktemp)"; trap "rm -f '$t'" INT TERM EXIT; cat >| "$t"; sha256sum --quiet -c <<<"${WIREGUARD_SHA256} $t" \
         || exit 1; cat "$t"; } | tar xJf -
 
-WORKDIR /tmp/WireGuard-${WIREGUARD_VERSION}/src
-
-RUN KERNELDIR=/usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/build make -j$(nproc) && make install
+RUN cd /tmp/WireGuard-${WIREGUARD_VERSION}/src; \
+    KERNELDIR=/usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/build make -j$(nproc) && make install
 
 FROM fedora
 MAINTAINER "Joe Doss" <joe@solidadmin.com>
