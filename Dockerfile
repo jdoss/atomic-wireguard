@@ -8,7 +8,7 @@ ARG WIREGUARD_SHA256
 WORKDIR /tmp
 
 RUN dnf update -y && dnf install \
-        libmnl-devel elfutils-libelf-devel findutils binutils boost-atomic boost-chrono \
+        libmnl libmnl-devel elfutils-libelf-devel findutils binutils boost-atomic boost-chrono \
         boost-date-time boost-system boost-thread cpp dyninst efivar-libs gc \
         gcc glibc-devel glibc-headers guile koji isl libatomic_ops libdwarf libmpc \
         libpkgconf libtool-ltdl libxcrypt-devel make mokutil pkgconf pkgconf-m4 \
