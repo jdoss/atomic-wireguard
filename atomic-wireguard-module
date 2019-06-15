@@ -24,6 +24,8 @@
 
 set -e
 
+source /etc/sysconfig/atomic-wireguard
+
 WIREGUARD_KERNEL_VERSION=$(uname -r)
 
 build_wireguard()
