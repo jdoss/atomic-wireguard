@@ -1,4 +1,4 @@
-FROM fedora as builder
+FROM fedora:30 as builder
 MAINTAINER "Joe Doss" <joe@solidadmin.com>
 
 ARG WIREGUARD_VERSION
@@ -27,7 +27,7 @@ RUN dnf update -y && dnf install \
 RUN cd /tmp/WireGuard-${WIREGUARD_VERSION}/src; \
     KERNELDIR=/usr/lib/modules/${WIREGUARD_KERNEL_VERSION}/build make -j$(nproc) && make install
 
-FROM fedora
+FROM fedora:30
 MAINTAINER "Joe Doss" <joe@solidadmin.com>
 
 ARG WIREGUARD_KERNEL_VERSION
