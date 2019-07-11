@@ -34,7 +34,7 @@ ARG WIREGUARD_KERNEL_VERSION
 
 WORKDIR /tmp
 
-RUN dnf update -y && dnf install kmod koji -y && \
+RUN dnf update -y && dnf install kmod koji libmnl -y && \
         koji download-build --rpm --arch=x86_64 kernel-core-${WIREGUARD_KERNEL_VERSION} && \
         koji download-build --rpm --arch=x86_64 kernel-modules-${WIREGUARD_KERNEL_VERSION} && \
         dnf install /tmp/kernel-core-${WIREGUARD_KERNEL_VERSION}.rpm \
